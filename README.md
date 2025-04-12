@@ -1,277 +1,274 @@
-# MCP安全检查清单：AI工具生态系统安全指南
+# MCP Security Checklist: A Security Guide for the AI Tool Ecosystem
 
-## 📚 目录
+## 📚 Table of Contents
 
-- [概要](#概要)
-- [如何使用](#如何使用)
-- [MCP Server(MCP插件)安全](#mcp-servermcp-插件安全)
-- [MCP客户端/MCP HOST安全](#mcp客户端mcp-host安全)
-- [MCP在不同LLM上的适配和调用安全](#mcp在不同llm上的适配和调用安全)
-- [多MCP场景安全](#多mcp场景安全)
-- [加密货币相关MCP的特有安全点](#加密货币相关-mcp的特有安全点)
+- [Overview](#overview)
+- [How to Use](#how-to-use)
+- [MCP Server (MCP Plugin) Security](#mcp-servermcp-plugin-security)
+- [MCP Client/MCP HOST Security](#mcp-clientmcp-host-security)
+- [MCP Adaptation and Invocation Security on Different LLMs](#mcp-adaptation-and-invocation-security-on-different-llms)
+- [Multi-MCP Scenario Security](#multi-mcp-scenario-security)
+- [Unique Security Points for Cryptocurrency-related MCPs](#unique-security-points-for-cryptocurrency-related-mcps)
 
-## 概要
+## Overview
 
-随着大模型的迅猛发展，各种新的AI工具的也在不断涌现，当下代表性的MCP（Model Context Protocol）标准实现的工具正逐渐成为连接大语言模型（LLM）与外部工具、数据源之间的关键桥梁。自 2024 年底发布以来，MCP 已被广泛应用于 Claude Desktop、Cursor 等主流 AI 应用中，MCP Server 的各种商店也在不断出现，展现出强大的生态扩展能力。​
+With the rapid development of large language models (LLMs), various new AI tools are continuously emerging. MCP (Model Context Protocol), a representative tool standard implementation, has become a critical bridge between large language models (LLMs) and external tools or data sources. Since its release at the end of 2024, MCP has been widely adopted in mainstream AI applications such as Claude Desktop and Cursor. Different MCP Server “stores” have also started to appear, showcasing a powerful ecosystem expansion capability.
 
-然而，MCP 的快速普及也带来了新的安全挑战。当前MCP架构中，系统由 **Host（本地运行的 AI 应用环境）**、**Client（负责与Server通信与工具调用的组件）** 以及 **Server（MCP 插件所对应的服务端）** 三部分构成。用户通过 Host 与 AI 交互，Client 将用户请求解析并转发至 MCP Server，执行工具调用或资源访问。在多实例、多组件协同运行的场景下，该架构暴露出一系列安全风险，尤其在涉及加密货币交易或 LLM 自定义插件适配等敏感场景中，风险更为突出。
+However, the fast proliferation of MCP brings new security challenges. The current MCP architecture comprises three parts: **Host (the locally running AI application environment)**, **Client (the component that communicates with the Server and handles tool invocation)**, and **Server (the service side corresponding to the MCP plugin)**. Users interact with the AI via the Host; the Client parses user requests and forwards them to the MCP Server to perform tool calls or resource access. In scenarios where multiple instances and components collaborate, this architecture exposes a range of security risks, especially in sensitive contexts such as cryptocurrency transactions or LLM custom plugin adaptation.
 
-然而，MCP 的快速普及也带来了新的安全挑战。MCP架构由三个核心组件组成：MCP Host(运行AI应用的环境，如Claude Desktop)、MCP Client(管理主机与服务间通信的中介)以及MCP Server(提供工具、资源和提示的功能接口)。用户通过向MCP Host发送提示，Client配合LLM分析意图并通过MCP服务选择适当工具，调用外部API处理信息后将结果呈现给用户。尽管这一架构促进了AI与外部系统的无缝交互，但在涉及加密货币交易或自定义插件等敏感场景中，服务名称冲突、安装程序欺骗和工具名称冲突等安全风险尤为显著，需要适当的安全措施来管理。
-
-在此背景下，**制定和遵循一套全面的 MCP 安全检查清单显得尤为重要**。本清单涵盖了从用户交互界面、客户端组件、服务插件，到多 MCP 协作机制及特定领域（如加密货币场景）的安全要点，旨在帮助开发者系统性地识别潜在风险并及时加以防范。通过落实这些安全措施，可有效提升 MCP 系统的整体稳定性与可控性，确保 AI 应用在快速发展的同时，安全性也同步得到保障。
+MCP’s swift adoption highlights the importance of a **comprehensive MCP Security Checklist**. This checklist covers security considerations from user interaction interfaces, client components, server plugins, and multi-MCP collaboration mechanisms to specialized fields (e.g., cryptocurrency). It aims to help developers systematically identify potential risks and address them promptly. By implementing these security measures, one can effectively enhance the overall stability and controllability of MCP systems, ensuring that while AI applications evolve rapidly, security also keeps pace.
 
 <p align="center">
-  <img src="assets/mcp_risk_points_cn.png" alt="MCP流程风险图" />
+  <img src="assets/mcp_risk_points_en.png" alt="MCP flow risk diagram" />
 </p>
 
 <p align="center" style="font-style: italic; color: gray;">
-  图：MCP多组件交互流程与关键风险点示意图
+  Figure: Schematic diagram of MCP multi-component interaction process and key risk points
 </p>
 
-## 如何使用
+## How to Use
 
-本检查表基于我们在对MCP项目审计中遇到的可能风险点，旨在帮助开发者确保MCP实现的安全性。我们使用3个级别的优先级标识项目的重要性：
+This checklist is based on possible risk points encountered during our security audits of MCP projects, aiming to help developers ensure the security of MCP implementations. We use three priority levels to denote the importance of each item:
 
-- ![低][low_img] 表示推荐项目，但在特定情况下可以省略。
-- ![中][medium_img] 表示强烈推荐项目，但在特殊情况下可以省略，省略可能会对安全性产生负面影响。
-- ![高][high_img] 表示在任何情况下都不能省略的项目，移除这些元素可能导致系统故障或安全漏洞。
+- ![Low][low_img] Indicates recommended items that can be omitted in specific contexts.
+- ![Medium][medium_img] Indicates strongly recommended items which could be omitted in special cases, but doing so might negatively impact security.
+- ![High][high_img] Indicates items that must not be omitted under any circumstances; removing them may lead to system failures or security vulnerabilities.
 
-## MCP Server(MCP 插件)安全
+## MCP Server (MCP Plugin) Security
 
-> **说明:** MCP服务是提供工具、资源和功能供AI调用的外部服务。即是目前MCP插件的形态。一般包含 Resources Tools Prompts
+> **Note:** The MCP Server provides external tools, resources, and functionalities that AI can invoke. This is essentially the MCP plugin form. In general, it contains Resources, Tools, and Prompts.
 
-### API安全
+### API Security
 
-- [ ] **输入验证:** ![高][high_img] 严格验证所有API输入，防止注入攻击和非法参数。
-- [ ] **API速率限制:** ![中][medium_img] 实施API调用速率限制，防止滥用和攻击。
-- [ ] **输出编码:** ![中][medium_img] 正确编码API输出。
+- [ ] **Input Validation:** ![High][high_img] Enforce strict validation on all API inputs to prevent injection attacks and invalid parameters.
+- [ ] **API Rate Limiting:** ![Medium][medium_img] Implement call rate limits to prevent abuse or DoS attacks.
+- [ ] **Output Encoding:** ![Medium][medium_img] Properly encode API outputs.
 
-### Server 身份验证与授权
+### Server Authentication & Authorization
 
-- [ ] **访问控制:** ![高][high_img] 实施基于角色的访问控制，限制资源访问，实施最小权限原则。
-- [ ] **凭证管理:** ![高][high_img] 安全管理和存储服务凭证，避免硬编码，使用密钥管理服务。
-- [ ] **外部服务认证:** ![高][high_img] 使用安全方式向第三方服务认证。
-- [ ] **最小权限:** ![中][medium_img] 服务进程以最小必要权限运行，减少潜在攻击面和提权风险。
-- [ ] **API密钥轮换:** ![中][medium_img] 定期自动轮换API密钥和服务凭证，限制密钥有效期。
-- [ ] **服务身份验证:** ![中][medium_img] 提供Tools验证服务身份的机制，方便客户端验证和安全使用。
+- [ ] **Access Control:** ![High][high_img] Implement role-based access control, limit resource access, and enforce the principle of least privilege.
+- [ ] **Credential Management:** ![High][high_img] Securely manage and store service credentials; avoid hard-coded secrets and use key management services.
+- [ ] **External Service Authentication:** ![High][high_img] Use secure methods when authenticating with third-party services.
+- [ ] **Least Privilege:** ![Medium][medium_img] Run service processes with the minimum required permissions to reduce the potential attack surface and elevation risks.
+- [ ] **API Key Rotation:** ![Medium][medium_img] Automatically rotate API keys and service credentials periodically, limiting the valid timeframe of keys.
+- [ ] **Service Identity Authentication:** ![Medium][medium_img] Provide a mechanism for Tools to verify the Server’s identity, helping clients to authenticate and use the service securely.
 
-### 后台持久性控制
+### Background Persistence Control
 
-- [ ] **生命周期管理:** ![高][high_img] 实施严格的MCP插件生命周期管理，与客户端同步。
-- [ ] **关闭清理:** ![高][high_img] 客户端关闭时强制清理所有MCP后台进程。
-- [ ] **健康检查机制:** ![中][medium_img] 定期检查MCP插件状态，识别异常持久性。
-- [ ] **后台活动监控:** ![中][medium_img] 监控和记录所有MCP后台活动。
-- [ ] **活动限制:** ![中][medium_img] 限制MCP插件可在后台执行的操作类型和持续时间。
+- [ ] **Lifecycle Management:** ![High][high_img] Implement strict lifecycle management for MCP plugins and coordinate with the client.
+- [ ] **Shutdown Cleanup:** ![High][high_img] Forcefully clean up all MCP background processes when the client is shut down.
+- [ ] **Health Check Mechanism:** ![Medium][medium_img] Regularly check the status of MCP plugins to detect abnormal persistence.
+- [ ] **Background Activity Monitoring:** ![Medium][medium_img] Monitor and log all MCP background activities.
+- [ ] **Activity Restrictions:** ![Medium][medium_img] Limit the operations and their duration that MCP plugins can perform in the background.
 
-### 部署与运行时安全
+### Deployment & Runtime Security
 
-- [ ] **隔离环境:** ![高][high_img] 服务在隔离环境（容器、VM、沙箱）中运行，防止横向移动攻击。
-- [ ] **容器安全:** ![高][high_img] 使用强化的容器安全配置和非root用户运行，实施不可变基础设施，运行时保护。
-- [ ] **安全启动:** ![中][medium_img] 验证服务启动过程的完整性，实施安全启动链和完整性检查。
-- [ ] **环境变量安全:** ![中][medium_img] 敏感环境变量受到保护，不在日志中泄露。
-- [ ] **资源限制:** ![中][medium_img] 实施资源使用限制，防止大模型出错时大量循环重复调用。
+- [ ] **Isolation Environment:** ![High][high_img] Run server in isolated environments (containers, VMs, sandboxes) to prevent lateral movement attacks.
+- [ ] **Container Security:** ![High][high_img] Adopt hardened container security configurations and run containers as non-root users. Employ immutable infrastructure and runtime protection.
+- [ ] **Secure Boot:** ![Medium][medium_img] Validate service boot processes, implementing secure boot chains and integrity checks.
+- [ ] **Environment Variable Security:** ![Medium][medium_img] Protect sensitive environment variables and ensure they are not exposed in logs.
+- [ ] **Resource Limits:** ![Medium][medium_img] Enforce resource usage limits to prevent infinite loops or excessive calls when a large model malfunctions.
 
-### 代码与数据完整性
+### Code & Data Integrity
 
-- [ ] **完整性验证机制:** ![高][high_img] 使用数字签名、哈希校验等机制确保代码未被篡改。
-- [ ] **远程验证:** ![中][medium_img] 支持远程验证代码完整性的机制。
-- [ ] **代码混淆与加固:** ![低][low_img] 应用代码混淆和加固技术，增加逆向工程难度。
+- [ ] **Integrity Verification Mechanisms:** ![High][high_img] Use digital signatures, checksums, or similar to ensure code has not been tampered with.
+- [ ] **Remote Validation:** ![Medium][medium_img] Support mechanisms for remote verification of code integrity.
+- [ ] **Code Obfuscation & Hardening:** ![Low][low_img] Apply code obfuscation and hardening techniques to increase the difficulty of reverse engineering.
 
-### 供应链安全
+### Supply Chain Security
 
-- [ ] **依赖项管理:** ![高][high_img] 安全管理第三方依赖项。
-- [ ] **包完整性:** ![高][high_img] 验证包的完整性和真实性。
-- [ ] **来源验证:** ![中][medium_img] 验证所有代码和依赖项的来源。
-- [ ] **构建安全:** ![中][medium_img] 确保构建流程安全。
+- [ ] **Dependency Management:** ![High][high_img] Securely manage third-party dependencies.
+- [ ] **Package Integrity:** ![High][high_img] Verify the integrity and authenticity of packages.
+- [ ] **Source Verification:** ![Medium][medium_img] Validate the source of all code and dependencies.
+- [ ] **Secure Build:** ![Medium][medium_img] Ensure the build process is secure.
 
-### 监控与日志记录
+### Monitoring & Logging
 
-- [ ] **异常检测:** ![高][high_img] 检测和报告异常活动模式。
-- [ ] **详细日志记录:** ![高][high_img] 记录所有服务活动和安全事件。
-- [ ] **安全事件告警:** ![高][high_img] 配置关键安全事件的实时告警。
-- [ ] **集中日志管理:** ![中][medium_img] 集中收集和分析日志。
-- [ ] **日志完整性:** ![中][medium_img] 确保日志完整性，防止篡改。
-- [ ] **审计能力:** ![中][medium_img] 支持详细的审计和事件调查。
+- [ ] **Anomaly Detection:** ![High][high_img] Detect and report anomalous activity patterns.
+- [ ] **Detailed Logging:** ![High][high_img] Log all service activities and security events.
+- [ ] **Security Event Alerts:** ![High][high_img] Configure real-time alerts for critical security events.
+- [ ] **Centralized Log Management:** ![Medium][medium_img] Collect and analyze logs in a centralized manner.
+- [ ] **Log Integrity:** ![Medium][medium_img] Ensure log integrity to prevent tampering.
+- [ ] **Audit Capability:** ![Medium][medium_img] Provide detailed auditing and incident investigation capabilities.
 
-### 调用环境隔离
+### Invocation Environment Isolation
 
-- [ ] **MCP间隔离:** ![高][high_img] 确保多个MCP服务之间的操作隔离。
-- [ ] **资源访问控制:** ![高][high_img] 为每个MCP服务分配明确的资源访问权限边界。
-- [ ] **工具权限分离:** ![中][medium_img] 不同领域的工具使用不同的权限集。
+- [ ] **Isolation Between MCP Instances:** ![High][high_img] Ensure operational isolation among multiple MCP Servers.
+- [ ] **Resource Access Control:** ![High][high_img] Assign each MCP Server a clearly defined resource access boundary.
+- [ ] **Tool Permission Separation:** ![Medium][medium_img] Use distinct permission sets for tools in different domains.
 
-### 平台兼容性与安全
+### Platform Compatibility & Security
 
-- [ ] **系统资源隔离:** ![高][high_img] 根据不同操作系统特性实施适当的资源隔离策略。
-- [ ] **跨平台兼容性测试:** ![中][medium_img] 测试MCP服务在不同操作系统和客户端上的安全行为一致性。
-- [ ] **平台特定风险评估:** ![中][medium_img] 评估特定平台的独特安全风险和缓解措施。
-- [ ] **客户端差异处理:** ![中][medium_img] 确保安全控制能适应各种客户端实现的差异。
+- [ ] **System Resource Isolation:** ![High][high_img] Implement suitable resource isolation strategies according to different operating system characteristics.
+- [ ] **Cross-platform Compatibility Testing:** ![Medium][medium_img] Test consistent security behavior of MCP Server across different OS and clients.
+- [ ] **Platform-specific Risk Assessment:** ![Medium][medium_img] Evaluate unique security risks specific to each platform and apply mitigating measures.
+- [ ] **Client-specific Handling:** ![Medium][medium_img] Ensure security controls can adapt to differences among various client implementations.
 
-### 数据安全与隐私
+### Data Security & Privacy
 
-- [ ] **数据最小化:** ![高][high_img] 仅收集和处理必要的数据。
-- [ ] **数据加密:** ![高][high_img] 敏感数据在存储和传输中加密。
-- [ ] **数据隔离:** ![高][high_img] 不同用户的数据得到有效隔离。
-- [ ] **数据访问控制:** ![高][high_img] 实施严格的数据访问控制。
-- [ ] **敏感数据识别:** ![高][high_img] 自动识别和特殊处理敏感数据。
+- [ ] **Data Minimization:** ![High][high_img] Collect and process only the necessary data.
+- [ ] **Data Encryption:** ![High][high_img] Encrypt sensitive data in storage and transit.
+- [ ] **Data Isolation:** ![High][high_img] Ensure effective isolation of different users’ data.
+- [ ] **Data Access Control:** ![High][high_img] Enforce strict access controls on data.
+- [ ] **Sensitive Data Identification:** ![High][high_img] Automatically identify and handle sensitive data in a specialized manner.
 
-### 资源安全（Resources Security）
+### Resources Security
 
-- [ ] **资源访问控制:** ![高][high_img] 实施细粒度的资源访问控制。
-- [ ] **资源限制:** ![中][medium_img] 限制单个资源的大小和数量。
-- [ ] **资源模板安全:** ![中][medium_img] 确保资源模板参数经过验证和清理。
-- [ ] **敏感资源标记:** ![中][medium_img] 标记并特殊处理敏感资源。
+- [ ] **Resource Access Control:** ![High][high_img] Implement fine-grained access control for resources.
+- [ ] **Resource Limits:** ![Medium][medium_img] Limit the size and quantity of a single resource.
+- [ ] **Resource Template Security:** ![Medium][medium_img] Validate and sanitize template parameters of resources.
+- [ ] **Sensitive Resource Labeling:** ![Medium][medium_img] Label and handle sensitive resources distinctly.
 
-### 工具实现安全（Tools Security）
+### Tools Security
 
-- [ ] **安全编码实践:** ![高][high_img] 遵循安全编码标准和最佳实践。
-- [ ] **工具隔离:** ![高][high_img] 工具执行在受控环境中，防止系统级别影响。
-- [ ] **输入验证:** ![高][high_img] 严格验证来自客户端的所有输入。
-- [ ] **工具权限控制:** ![高][high_img] 各工具仅拥有完成任务所需的最小权限。
-- [ ] **数据验证:** ![高][high_img] 验证工具处理的数据，防止注入和篡改。
-- [ ] **工具行为约束:** ![高][high_img] 限制工具可执行的操作范围和类型。
-- [ ] **第三方接口返回信息安全:** ![高][high_img] 验证接口返回信息是否符合预期，不可直接将返回信息插入上下文。
-- [ ] **错误处理:** ![中][medium_img] 安全处理错误，不泄露敏感信息。
-- [ ] **命名空间隔离:** ![中][medium_img] 为不同工具实施严格的命名空间隔离。
+- [ ] **Secure Coding Practices:** ![High][high_img] Adhere to security coding standards and best practices.
+- [ ] **Tool Isolation:** ![High][high_img] Execute tools in a controlled environment to prevent system-level impact.
+- [ ] **Input Validation:** ![High][high_img] Strictly validate all inputs from clients.
+- [ ] **Tool Permission Control:** ![High][high_img] Each tool should have only the minimum permissions needed to complete its task.
+- [ ] **Data Validation:** ![High][high_img] Validate the data processed by tools to prevent injection or tampering.
+- [ ] **Tool Behavior Constraints:** ![High][high_img] Restrict the range and types of actions a tool can perform.
+- [ ] **Third-party Interface Response Security:** ![High][high_img] Verify that the returned information from interfaces is as expected; do not directly insert the returned data into context.
+- [ ] **Error Handling:** ![Medium][medium_img] Handle errors securely without exposing sensitive information.
+- [ ] **Namespace Isolation:** ![Medium][medium_img] Enforce strict namespace isolation for different tools.
 
-**[⬆ 返回顶部](#-目录)**
+**[⬆ Back to Top](#-table-of-contents)**
 
-## MCP客户端/MCP HOST安全
+## MCP Client/MCP HOST Security
 
-> **说明:** Host是运行AI应用程序和MCP客户端的环境，是终端用户与AI系统交互的入口点。如Claude桌面版、Cursor、。Client是AI应用程序内部的组件，负责与MCP服务通信，处理上下文、工具调用和结果展示。一般情况下Client是默认集成在Host中的。
+> **Note:** The Host is the environment running the AI application and the MCP client, acting as the terminal where end users interact with AI (e.g., Claude Desktop, Cursor). The Client is a component within the AI application that communicates with the MCP Server, handling context, tool invocation, and result presentation. Typically, the Client is integrated into the Host by default.
 
-### 用户交互安全
+### User Interaction Security
 
-- [ ] **用户界面安全:** ![高][high_img] 用户界面明确显示AI操作的权限范围和潜在影响，提供直观的安全指示器。
-- [ ] **敏感操作确认:** ![高][high_img] 高风险操作（如文件删除、资金转账）需要明确用户确认。
-- [ ] **权限请求透明:** ![高][high_img] 权限请求明确说明用途和范围，帮助用户做出明智决策，避免过度授权。
-- [ ] **操作可视化:** ![中][medium_img] 工具调用和数据访问对用户可见且可审核，提供详细的操作日志。
-- [ ] **状态反馈:** ![中][medium_img] 用户可清楚了解当前正在执行的MCP操作。
+- [ ] **User Interface Security:** ![High][high_img] The UI should clearly display the scope of AI operations and potential impacts, offering an intuitive security indicator.
+- [ ] **Confirmation of Sensitive Operations:** ![High][high_img] High-risk operations (e.g., file deletion, fund transfers) must explicitly require user confirmation.
+- [ ] **Transparency in Permission Requests:** ![High][high_img] Permission requests should explicitly state their purpose and scope so users can make informed decisions and avoid over-authorization.
+- [ ] **Operation Visualization:** ![Medium][medium_img] Tool invocation and data access should be visible and auditable by users, accompanied by detailed operation logs.
+- [ ] **Status Feedback:** ![Medium][medium_img] Users should be able to clearly understand the current MCP operations in progress.
 
-### AI控制与监控
+### AI Control & Monitoring
 
-- [ ] **操作记录:** ![高][high_img] 记录所有重要AI操作及其结果。
-- [ ] **异常检测:** ![中][medium_img] 检测异常的工具调用模式或请求序列。
-- [ ] **工具调用限制:** ![中][medium_img] 实施工具调用频率和数量限制。
+- [ ] **Operation Logging:** ![High][high_img] Record all critical AI operations and their results.
+- [ ] **Anomaly Detection:** ![Medium][medium_img] Detect abnormal patterns of tool invocation or request sequences.
+- [ ] **Tool Invocation Limitation:** ![Medium][medium_img] Impose frequency and quantity limits on tool calls.
 
-### 本地存储安全
+### Local Storage Security
 
-- [ ] **凭证安全存储:** ![高][high_img] 对重要凭证使用系统密钥链或专用加密存储保护认证凭证，防止未经授权的访问。
-- [ ] **敏感数据隔离:** ![中][medium_img] 实施数据隔离机制，将敏感用户数据与普通数据分开存储和处理。
+- [ ] **Credential Secure Storage:** ![High][high_img] Use a system keychain or dedicated encrypted storage for sensitive credentials to prevent unauthorized access.
+- [ ] **Sensitive Data Isolation:** ![Medium][medium_img] Implement mechanisms to isolate sensitive user data from ordinary data in storage and processing.
 
-### 应用程序安全
+### Application Security
 
-- [ ] **应用完整性:** ![高][high_img] 验证应用程序及MCP插件的完整性，防止篡改。
-- [ ] **更新验证:** ![中][medium_img] Host应用更新经过数字签名验证。
-- [ ] **应用程序沙箱:** ![低][low_img] 尽量在沙箱环境中运行应用，限制系统访问。
+- [ ] **Application Integrity:** ![High][high_img] Validate the integrity of the application and MCP plugins to prevent tampering.
+- [ ] **Update Verification:** ![Medium][medium_img] Verify the digital signatures of Host application updates.
+- [ ] **Application Sandbox:** ![Low][low_img] Whenever possible, run the application in a sandbox environment to limit system access.
 
-### 客户端身份验证与授权
+### Client Authentication & Authorization
 
-- [ ] **强制认证:** ![高][high_img] 在与任何重要MCP服务通信前强制执行认证，防止匿名访问。
-- [ ] **OAuth实现:** ![中][medium_img] 正确实现OAuth 2.1或更高版本流程，遵循最佳实践和安全标准。
-- [ ] **状态参数:** ![中][medium_img] 对于部分Web客户端实施状态参数防止CSRF攻击，每次请求使用唯一随机值。
+- [ ] **Mandatory Authentication:** ![High][high_img] Enforce authentication before communicating with any critical MCP Server, preventing anonymous access.
+- [ ] **OAuth Implementation:** ![Medium][medium_img] Correctly implement OAuth 2.1 or higher, following best practices and security standards.
+- [ ] **State Parameter:** ![Medium][medium_img] For certain web clients, use a state parameter to mitigate CSRF attacks, employing a unique random value for each request.
 
-### MCP Tools与Servers管理
+### MCP Tools & Servers Management
 
-- [ ] **MCP工具验证:** ![高][high_img] 验证注册工具的真实性和完整性。
-- [ ] **安全更新:** ![高][high_img] MCP客户端定期检查并应用安全更新。
-- [ ] **函数名校验:** ![高][high_img] 注册工具前检查名称冲突和潜在恶意覆盖。
-- [ ] **恶意MCP检测:** ![高][high_img] 监控和识别潜在恶意MCP的行为模式。
-- [ ] **MCP工具命名控制:** ![中][medium_img] 采用命名空间或唯一标识符，防止命名冲突。
-- [ ] **服务目录:** ![中][medium_img] 维护可信MCP服务和工具的授权目录。
-- [ ] **冲突解决:** ![中][medium_img] 存在明确的规则解决同名工具冲突。
-- [ ] **域隔离:** ![中][medium_img] 不同域的工具彼此隔离，防止交叉影响。
-- [ ] **优先级机制:** ![中][medium_img] 建立明确的函数优先级规则，避免恶意覆盖。
-- [ ] **版本控制:** ![中][medium_img] 对函数和工具实施版本控制，检测变更。
-- [ ] **工具注册与注销机制:** ![中][medium_img] 明确工具注册和注销的流程，防止遗留工具的安全风险。
-- [ ] **冲突检测机制:** ![中][medium_img] 检测并解决多MCP环境中的函数和资源冲突。
-- [ ] **工具分类:** ![低][low_img] 根据敏感度和风险级别对工具进行分类。
+- [ ] **MCP Tool Verification:** ![High][high_img] Validate the authenticity and integrity of registered tools.
+- [ ] **Secure Updates:** ![High][high_img] The MCP client should regularly check for and apply security updates.
+- [ ] **Function Name Checking:** ![High][high_img] Check for name conflicts or malicious overwriting before registering any tool.
+- [ ] **Malicious MCP Detection:** ![High][high_img] Monitor and identify potentially malicious MCP behavior.
+- [ ] **MCP Tool Naming Control:** ![Medium][medium_img] Use namespaces or unique identifiers to avoid naming collisions.
+- [ ] **Server Directory:** ![Medium][medium_img] Maintain an authorized directory of trustworthy MCP Servers and tools.
+- [ ] **Conflict Resolution:** ![Medium][medium_img] Establish clear rules to resolve tool name conflicts.
+- [ ] **Domain Isolation:** ![Medium][medium_img] Isolate tools in different domains to prevent cross-impact.
+- [ ] **Priority Mechanism:** ![Medium][medium_img] Set explicit function priority rules to avoid malicious overwriting.
+- [ ] **Version Control:** ![Medium][medium_img] Version functions and tools to detect changes.
+- [ ] **Tool Registration & Deregistration Mechanism:** ![Medium][medium_img] Define clear processes for tool registration and deregistration to prevent leftover tools posing security risks.
+- [ ] **Conflict Detection Mechanism:** ![Medium][medium_img] Detect and resolve function and resource conflicts in multi-MCP environments.
+- [ ] **Tool Classification:** ![Low][low_img] Classify tools according to sensitivity and risk level.
 
-### 提示词安全
+### Prompt Security
 
-- [ ] **提示词注入防御:** ![高][high_img] 实施多层防御措施防止提示词注入攻击，包括对关键执行进行人工验证。
-- [ ] **恶意指令检测:** ![高][high_img] 建立机制检测并阻止潜在的恶意用户指令，避免系统被操纵。
-- [ ] **系统提示保护:** ![高][high_img] 系统提示与用户输入明确分离，防止篡改。
-- [ ] **敏感数据过滤:** ![高][high_img] 从提示和上下文中过滤敏感个人数据。
-- [ ] **上下文隔离:** ![中][medium_img] 确保不同来源的上下文内容相互隔离，防止上下文污染和信息泄露。
-- [ ] **提示词模板:** ![中][medium_img] 使用安全的提示词模板，减少注入风险。
-- [ ] **工具描述验证:** ![中][medium_img] 检查工具描述中的潜在恶意指令。
-- [ ] **提示词一致性验证:** ![中][medium_img] 确保相同提示词在不同环境下产生可预期的一致结果。
-- [ ] **历史上下文管理:** ![中][medium_img] 明确历史上下文的安全清理机制，防止旧数据累积造成的信息泄露风险。
+- [ ] **Prompt Injection Defense:** ![High][high_img] Implement layered defense measures to prevent prompt injection attacks, including manual verification for critical executions.
+- [ ] **Malicious Instruction Detection:** ![High][high_img] Establish mechanisms to detect and block potentially malicious user instructions, avoiding system manipulation.
+- [ ] **System Prompt Protection:** ![High][high_img] Clearly separate system prompts from user inputs to prevent tampering.
+- [ ] **Sensitive Data Filtering:** ![High][high_img] Filter out sensitive personal data from prompts and context.
+- [ ] **Context Isolation:** ![Medium][medium_img] Ensure that contexts from different sources remain isolated to prevent contamination or information leakage.
+- [ ] **Prompt Templates:** ![Medium][medium_img] Use secure prompt templates to reduce the risk of injection.
+- [ ] **Tool Description Verification:** ![Medium][medium_img] Check tool descriptions for potential malicious instructions.
+- [ ] **Prompt Consistency Verification:** ![Medium][medium_img] Ensure that identical prompts produce predictable and consistent results across different environments.
+- [ ] **Historical Context Management:** ![Medium][medium_img] Clearly define the mechanism for cleaning up historical context to prevent data buildup and potential information leakage.
 
-### 日志与审计
+### Logging & Auditing
 
-- [ ] **客户端日志记录:** ![高][high_img] 记录所有与MCP服务的交互、工具调用和授权活动。
-- [ ] **安全事件记录:** ![高][high_img] 记录所有安全相关事件，包括授权失败。
-- [ ] **异常告警:** ![中][medium_img] 检测并告警异常活动模式。
+- [ ] **Client Logging:** ![High][high_img] Record all interactions with the MCP Server, tool calls, and authorization activities.
+- [ ] **Security Event Recording:** ![High][high_img] Log all security-related events, including authorization failures.
+- [ ] **Anomaly Alerts:** ![Medium][medium_img] Detect and alert on abnormal activity patterns.
 
+### Server Verification & Communication Security
 
-### Server 验证与通信安全
+- [ ] **Server Identity Verification:** ![High][high_img] Verify the identity of the MCP Server to prevent connections to malicious servers; implement certificate pinning if possible.
+- [ ] **Certificate Validation:** ![High][high_img] Strictly validate TLS certificates of remote Servers to prevent Man-in-the-Middle (MitM) attacks and check the integrity of the certificate chain.
+- [ ] **Encrypted Communication:** ![High][high_img] Use TLS 1.2+ to encrypt all Client-Server communications; disable weak cipher suites.
+- [ ] **Secure Protocol Configuration:** ![Medium][medium_img] Configure secure TLS parameters, regularly review, and update encryption algorithms and protocols.
 
-- [ ] **Server 身份验证:** ![高][high_img] 验证MCP Server身份，防止连接到恶意Server，实施证书固定。
-- [ ] **证书验证:** ![高][high_img] 对远程Server严格验证TLS证书，防止中间人攻击，检查证书链完整性。
-- [ ] **通信加密:** ![高][high_img] 所有Client-Server通信使用TLS 1.2+加密，禁用弱加密套件。
-- [ ] **安全协议配置:** ![中][medium_img] 配置安全的TLS参数，定期审计和更新加密算法和协议。
+### Permission Token Storage & Management
 
-### 权限Token存储与管理
+- [ ] **Permission Scope Limitation:** ![High][high_img] Strictly limit the scope of tokens under the principle of least privilege.
 
-- [ ] **权限范围限制:** ![高][high_img] 严格限制token的权限范围，实施最小权限原则。
+### Auto-approve Control
 
-### 自动批准（autoApprove）控制
+- [ ] **Auto-approve Restrictions:** ![High][high_img] Carefully control which tools and operations can be auto-approved.
+- [ ] **Whitelist Management:** ![Medium][medium_img] Maintain a whitelist mechanism of tools that can be auto-approved.
+- [ ] **Dynamic Risk Assessment:** ![Medium][medium_img] Dynamically adjust auto-approve policies based on context.
+- [ ] **Approval Process Auditing:** ![Medium][medium_img] Log and audit all auto-approval decisions.
 
-- [ ] **自动批准限制:** ![高][high_img] 严格控制可被自动批准的工具和操作范围。
-- [ ] **白名单管理:** ![中][medium_img] 明确定义可自动批准工具的白名单机制。
-- [ ] **动态风险评估:** ![中][medium_img] 根据上下文动态调整自动批准策略。
-- [ ] **批准流程审计:** ![中][medium_img] 记录并审计所有自动批准决策。
+### Sampling Security
 
-### 采样安全（Sampling Security）
+- [ ] **Context Inclusion Control:** ![High][high_img] Strictly control the scope of context included in sampling requests.
+- [ ] **Sensitive Data Filtering:** ![High][high_img] Filter out sensitive data from sampling requests and responses.
+- [ ] **Sampling Request Validation:** ![Medium][medium_img] Validate all parameters and content within sampling requests.
+- [ ] **User Control:** ![Medium][medium_img] Ensure users have clear control over sampling requests and results.
+- [ ] **Model Preference Security:** ![Medium][medium_img] Handle model preference information securely to prevent misuse.
+- [ ] **Result Validation:** ![Medium][medium_img] Verify that sampling results conform to security standards.
 
-- [ ] **上下文包含控制:** ![高][high_img] 严格控制采样请求中包含的上下文范围。
-- [ ] **敏感数据过滤:** ![高][high_img] 从采样请求和响应中过滤敏感数据。
-- [ ] **采样请求验证:** ![中][medium_img] 验证所有采样请求参数和内容。
-- [ ] **用户控制:** ![中][medium_img] 确保用户对采样请求和结果有明确控制权。
-- [ ] **模型偏好安全:** ![中][medium_img] 安全处理模型偏好信息，防止滥用。
-- [ ] **结果验证:** ![中][medium_img] 验证采样结果是否符合安全标准。
+**[⬆ Back to Top](#-table-of-contents)**
 
-**[⬆ 返回顶部](#-目录)**
+## MCP Adaptation and Invocation Security on Different LLMs
+> **Note:** In practice, different LLM backends can vary in their invocation priorities and execution logic of MCP. Therefore, we need to not only focus on the MCP implementation but also on how the LLM and MCP work together.
 
-## MCP在不同LLM上的适配和调用安全
-> **说明:** 在实际使用过程中可以发现不同的LLM后端对MCP的调用的优先级和执行逻辑都会存在差异，所以我们不只需要关注MCP的实现也需要关注LLM与MCP之间的组合。
+### LLM Secure Execution
 
-### LLM安全执行
+- [ ] **Priority Function Execution:** ![High][high_img] Ensure the LLM can correctly prioritize and execute the intended plugin functions.
+- [ ] **Malicious Prompt Prevention:** ![High][high_img] The LLM should identify and defend against malicious mnemonic or injection instructions within prompts.
+- [ ] **Secure Invocation:** ![High][high_img] The LLM should securely and correctly invoke relevant MCP functionalities.
+- [ ] **Sensitive Information Protection:** ![High][high_img] Prevent leakage of sensitive information.
 
-- [ ] **优先函数执行:** ![高][high_img] 确保LLM可以优先执行正确插件的函数。
-- [ ] **恶意提示防护:** ![高][high_img] LLM能在提示恶意场景的情况下对注入的助记词要求的行为进行识别与防护。
-- [ ] **安全调用:** ![高][high_img] LLM能正确安全地调用相关MCP功能。
-- [ ] **敏感信息保护:** ![高][high_img] 防止敏感信息泄露。
+### Multi-modal Security
 
-### 多模态安全
+- [ ] **Multi-modal Content Filtering:** ![High][high_img] Filter out harmful or sensitive information in multi-modal content (e.g., malicious prompt text within images).
 
-- [ ] **多模态内容过滤:** ![高][high_img] 过滤多模态内容中的有害或敏感信息（如图片中的恶意提示词）。
+**[⬆ Back to Top](#-table-of-contents)**
 
-**[⬆ 返回顶部](#-目录)**
+## Multi-MCP Scenario Security
+> **Note:** It is common for users to simultaneously enable multiple MCP Servers in daily use. Given that no official store currently audits MCP plugins, users might install malicious MCPs that seriously compromise overall usage security. This demands heightened caution: introducing a malicious MCP can pose significant security risks.
 
-## 多MCP场景安全
-> **说明:** 用户正常使用MCP时经常会同时启用多个MCP Sever，由于目前还没有官方商店对MCP插件进行审计，用户很可能会安装到恶意MCP，这里需要非常注意，引入了恶意MCP会对整体使用安全带来极大隐患。
+- [ ] **Multi-MCP Environment Security:** ![High][high_img] Ensure overall security in multi-MCP environments; periodically scan and inspect installed MCPs.
+- [ ] **Function Priority Hijacking Prevention:** ![High][high_img] Check for potential malicious prompt presets to prevent hijacking of function priority.
+- [ ] **Cross-MCP Function Call Control:** ![Medium][medium_img] Implement secure control over cross-MCP function calls.
 
-- [ ] **多MCP环境安全:** ![高][high_img] 确保多MCP环境的整体安全性，定期对安装的MCP进行扫描检查。
-- [ ] **函数优先级劫持防护:** ![高][high_img] 检查可能的恶意提示词预设，防止函数优先级被恶意劫持。
-- [ ] **跨MCP函数调用控制:** ![中][medium_img] 安全控制跨MCP函数调用。
+**[⬆ Back to Top](#-table-of-contents)**
 
-**[⬆ 返回顶部](#-目录)**
+## Unique Security Points for Cryptocurrency-related MCPs
+> **Note:** With the increasing number of MCPs for cryptocurrency, many carry high-risk operations like managing crypto wallets. The following suggestions specifically target cryptocurrency-related MCPs.
 
-## 加密货币相关 MCP的特有安全点
-> **说明:** 当前越来越多加密货币相关的MCP出现，其中很多拥有管理加密货币钱包这一高风险操作的功能，所以这里着重为加密货币相关MCP提出一些建议。
+- [ ] **Private Key Protection:** ![High][high_img] Enhance security measures for private keys (e.g., using Scrypt).
+- [ ] **Wallet Generation Security:** ![High][high_img] Ensure the security of mnemonic or wallet generation processes.
+- [ ] **Wallet Information Privacy:** ![High][high_img] Protect wallet information privacy; thoroughly filter data before sending wallet information to third-party interfaces.
+- [ ] **Transfer Information Confirmation:** ![High][high_img] Ensure the completeness and clarity of all on-chain or exchange transfer signature information.
+- [ ] **Funds Operation Verification:** ![High][high_img] Implement secondary verification methods (e.g., Google Authenticator) for critical fund operations.
+- [ ] **Local Model Privacy Protection:** ![Medium][medium_img] Use locally hosted LLMs to safeguard privacy data; prevent third-party model providers from accessing wallet information or other sensitive data.
+- [ ] **Traditional Wallet Compatibility:** ![Medium][medium_img] Provide secure compatibility with traditional wallets, such as supporting transaction signing through existing wallet solutions.
 
-- [ ] **私钥保护:** ![高][high_img] 加强私钥的安全保护措施，如Scrypt。
-- [ ] **钱包生成安全:** ![高][high_img] 助记词或钱包生成过程的安全性保障。
-- [ ] **钱包信息隐私:** ![高][high_img] 保护钱包信息隐私，将钱包信息请求第三方接口时候需要做好过滤。
-- [ ] **转账信息确认:** ![高][high_img] 链上或交易所转账签名的信息需要完整展示并确认。
-- [ ] **资金操作验证:** ![高][high_img] 对重要资金操作需二次验证，如Google Authenticator。
-- [ ] **本地模型隐私保护:** ![中][medium_img] 使用本地大模型保护隐私数据，防止第三方大模型厂商获取到你的钱包信息等敏感信息。
-- [ ] **传统钱包兼容:** ![中][medium_img] 对传统钱包的安全兼容，如支持用传统钱包进行签名操作等。
+**[⬆ Back to Top](#-table-of-contents)**
 
-**[⬆ 返回顶部](#-目录)**
-
-[low_img]: assets/priority/low.svg
-[medium_img]: assets/priority/medium.svg
+[low_img]: assets/priority/low.svg  
+[medium_img]: assets/priority/medium.svg  
 [high_img]: assets/priority/high.svg
