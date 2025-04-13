@@ -2,8 +2,14 @@
 
 [![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/slowmist_team.svg?style=social&label=Follow%20%40SlowMist_Team)](https://twitter.com/slowmist_team) 
 
-[English Version](./README.md), 
-[中文版本](./README_CN.md),
+[English Version](./README.md), [中文版本](./README_CN.md)
+
+## Author Information
+This security checklist was compiled and is maintained by [@SlowMist](https://twitter.com/slowmist_team).
+> SlowMist, a global leader in blockchain ecosystem threat intelligence, aims to enhance security protection and safeguard user privacy during the integration of blockchain and AI ecosystems.
+
+We sincerely thank [FENZ.AI](https://fenz.ai/) for their valuable contributions and support.
+> FENZ.AI redefines AI security with future-proof auditing. FENZ is the essential infrastructure for the AI era: "Superintelligence starts with super safety."
 
 ## 📚 Table of Contents
 
@@ -14,7 +20,7 @@
 - [MCP Adaptation and Invocation Security on Different LLMs](#mcp-adaptation-and-invocation-security-on-different-llms)
 - [Multi-MCP Scenario Security](#multi-mcp-scenario-security)
 - [Unique Security Points for Cryptocurrency-related MCPs](#unique-security-points-for-cryptocurrency-related-mcps)
-
+- [References](#references)
 ## Overview
 
 With the rapid development of large language models (LLMs), a variety of new AI tools have continued to emerge. Among them, tools based on the Model Context Protocol (MCP) standard have become a key bridge connecting LLMs with external tools and data sources. Since its release in late 2024, MCP has been widely adopted in mainstream AI applications such as Claude Desktop and Cursor. Various MCP Server marketplaces have also emerged, demonstrating strong ecosystem scalability.
@@ -148,6 +154,8 @@ This checklist is based on possible risk points encountered during our security 
 - [ ] **Confirmation of Sensitive Operations:** ![High][high_img] High-risk operations (e.g., file deletion, fund transfers) must explicitly require user confirmation.
 - [ ] **Transparency in Permission Requests:** ![High][high_img] Permission requests should explicitly state their purpose and scope so users can make informed decisions and avoid over-authorization.
 - [ ] **Operation Visualization:** ![Medium][medium_img] Tool invocation and data access should be visible and auditable by users, accompanied by detailed operation logs.
+- [ ] **Information Transparency:** ![Medium][medium_img]  
+  Tools should allow users to choose whether to display hidden tags by default, such as `<SECRET>`. This ensures that the context seen by the user is consistent with what is actually generated and invoked, preventing malicious logic from being embedded within hidden tags.
 - [ ] **Status Feedback:** ![Medium][medium_img] Users should be able to clearly understand the current MCP operations in progress.
 
 ### AI Control & Monitoring
@@ -176,7 +184,7 @@ This checklist is based on possible risk points encountered during our security 
 ### MCP Tools & Servers Management
 
 - [ ] **MCP Tool Verification:** ![High][high_img] Validate the authenticity and integrity of registered tools.
-- [ ] **Secure Updates:** ![High][high_img] The MCP client should regularly check for and apply security updates.
+- [ ] **Secure Updates:** ![High][high_img] The MCP client should regularly check for and apply security updates, and verify whether the updated tools contain any malicious descriptions.
 - [ ] **Function Name Checking:** ![High][high_img] Check for name conflicts or malicious overwriting before registering any tool.
 - [ ] **Malicious MCP Detection:** ![High][high_img] Monitor and identify potentially malicious MCP behavior.
 - [ ] **MCP Tool Naming Control:** ![Medium][medium_img] Use namespaces or unique identifiers to avoid naming collisions.
@@ -192,7 +200,7 @@ This checklist is based on possible risk points encountered during our security 
 ### Prompt Security
 
 - [ ] **Prompt Injection Defense:** ![High][high_img] Implement layered defense measures to prevent prompt injection attacks, including manual verification for critical executions.
-- [ ] **Malicious Instruction Detection:** ![High][high_img] Establish mechanisms to detect and block potentially malicious user instructions, avoiding system manipulation.
+- [ ] **Malicious Instruction Detection:** ![High][high_img] Establish mechanisms to detect and block potential malicious user instructions, preventing the system from being manipulated. This includes detecting and blocking preloaded malicious prompts during local initialization, as well as identifying harmful instructions embedded in tools provided by third-party MCP servers.
 - [ ] **System Prompt Protection:** ![High][high_img] Clearly separate system prompts from user inputs to prevent tampering.
 - [ ] **Sensitive Data Filtering:** ![High][high_img] Filter out sensitive personal data from prompts and context.
 - [ ] **Context Isolation:** ![Medium][medium_img] Ensure that contexts from different sources remain isolated to prevent contamination or information leakage.
@@ -257,7 +265,7 @@ This checklist is based on possible risk points encountered during our security 
 
 - [ ] **Multi-MCP Environment Security:** ![High][high_img] Ensure overall security in multi-MCP environments; periodically scan and inspect installed MCPs.
 - [ ] **Function Priority Hijacking Prevention:** ![High][high_img] Check for potential malicious prompt presets to prevent hijacking of function priority.
-- [ ] **Cross-MCP Function Call Control:** ![Medium][medium_img] Implement secure control over cross-MCP function calls.
+- [ ] **Cross-MCP Function Call Control:** ![High][high_img] Secure control over cross-MCP function calls to prevent malicious MCP servers from returning harmful prompts that could trigger other MCPs to perform sensitive operations.
 
 **[⬆ Back to Top](#-table-of-contents)**
 
@@ -273,6 +281,11 @@ This checklist is based on possible risk points encountered during our security 
 - [ ] **Traditional Wallet Compatibility:** ![Medium][medium_img] Provide secure compatibility with traditional wallets, such as supporting transaction signing through existing wallet solutions.
 
 **[⬆ Back to Top](#-table-of-contents)**
+
+---
+
+## References
+- [Model Context Protocol (MCP) GitHub](https://github.com/modelcontextprotocol/modelcontextprotocol)
 
 [low_img]: assets/priority/low.svg  
 [medium_img]: assets/priority/medium.svg  
