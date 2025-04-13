@@ -1,5 +1,10 @@
 # MCP Security Checklist: A Security Guide for the AI Tool Ecosystem
 
+[![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/slowmist_team.svg?style=social&label=Follow%20%40SlowMist_Team)](https://twitter.com/slowmist_team) 
+
+[English Version](./README.md), 
+[中文版本](./README_CN.md),
+
 ## 📚 Table of Contents
 
 - [Overview](#overview)
@@ -12,11 +17,11 @@
 
 ## Overview
 
-With the rapid development of large language models (LLMs), various new AI tools are continuously emerging. MCP (Model Context Protocol), a representative tool standard implementation, has become a critical bridge between large language models (LLMs) and external tools or data sources. Since its release at the end of 2024, MCP has been widely adopted in mainstream AI applications such as Claude Desktop and Cursor. Different MCP Server “stores” have also started to appear, showcasing a powerful ecosystem expansion capability.
+With the rapid development of large language models (LLMs), a variety of new AI tools have continued to emerge. Among them, tools based on the Model Context Protocol (MCP) standard have become a key bridge connecting LLMs with external tools and data sources. Since its release in late 2024, MCP has been widely adopted in mainstream AI applications such as Claude Desktop and Cursor. Various MCP Server marketplaces have also emerged, demonstrating strong ecosystem scalability.
 
-However, the fast proliferation of MCP brings new security challenges. The current MCP architecture comprises three parts: **Host (the locally running AI application environment)**, **Client (the component that communicates with the Server and handles tool invocation)**, and **Server (the service side corresponding to the MCP plugin)**. Users interact with the AI via the Host; the Client parses user requests and forwards them to the MCP Server to perform tool calls or resource access. In scenarios where multiple instances and components collaborate, this architecture exposes a range of security risks, especially in sensitive contexts such as cryptocurrency transactions or LLM custom plugin adaptation.
+However, the rapid adoption of MCP has also introduced new security challenges. In the current MCP architecture, the system consists of three main components: the **Host** (the local environment where the AI application runs), the **Client** (responsible for communicating with the Server and invoking tools), and the **Server** (the backend service corresponding to an MCP plugin). Users interact with the AI through the Host, while the Client parses the user's request and forwards it to the MCP Server for tool invocation or resource access. In scenarios involving multiple instances and cross-component collaboration, this architecture exposes a range of security risks—especially in sensitive contexts such as cryptocurrency transactions or custom plugin integration with LLMs—where the potential for exploitation is even higher and requires appropriate security controls.
 
-MCP’s swift adoption highlights the importance of a **comprehensive MCP Security Checklist**. This checklist covers security considerations from user interaction interfaces, client components, server plugins, and multi-MCP collaboration mechanisms to specialized fields (e.g., cryptocurrency). It aims to help developers systematically identify potential risks and address them promptly. By implementing these security measures, one can effectively enhance the overall stability and controllability of MCP systems, ensuring that while AI applications evolve rapidly, security also keeps pace.
+Against this backdrop, **establishing and following a comprehensive MCP Security Checklist becomes critically important**. This checklist covers key areas ranging from user interface interaction, client components, and service-side plugins, to multi-MCP collaboration mechanisms and domain-specific scenarios such as cryptocurrency integrations. It is designed to help developers systematically identify and mitigate potential risks. By implementing these security measures, the overall stability and controllability of MCP systems can be significantly enhanced, ensuring that security evolves in parallel with the rapid advancement of AI applications.
 
 <p align="center">
   <img src="assets/mcp_risk_points_en.png" alt="MCP flow risk diagram" />
@@ -63,7 +68,7 @@ This checklist is based on possible risk points encountered during our security 
 
 ### Deployment & Runtime Security
 
-- [ ] **Isolation Environment:** ![High][high_img] Run server in isolated environments (containers, VMs, sandboxes) to prevent lateral movement attacks.
+- [ ] **Isolation Environment:** ![High][high_img] Server runs in an isolated environment (container, VM, or sandbox) to prevent escape and mitigate lateral movement attacks.
 - [ ] **Container Security:** ![High][high_img] Adopt hardened container security configurations and run containers as non-root users. Employ immutable infrastructure and runtime protection.
 - [ ] **Secure Boot:** ![Medium][medium_img] Validate service boot processes, implementing secure boot chains and integrity checks.
 - [ ] **Environment Variable Security:** ![Medium][medium_img] Protect sensitive environment variables and ensure they are not exposed in logs.
