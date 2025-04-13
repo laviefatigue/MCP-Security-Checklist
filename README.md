@@ -5,7 +5,7 @@
 [English Version](./README.md), [中文版本](./README_CN.md)
 
 ## Author Information
-This security checklist was compiled and is maintained by [@SlowMist](https://twitter.com/slowmist_team).
+This security checklist was compiled and is maintained by [@SlowMist_Team](https://twitter.com/slowmist_team).
 > SlowMist, a global leader in blockchain ecosystem threat intelligence, aims to enhance security protection and safeguard user privacy during the integration of blockchain and AI ecosystems.
 
 We sincerely thank [FENZ.AI](https://fenz.ai/) for their valuable contributions and support.
