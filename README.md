@@ -286,6 +286,7 @@ This checklist is based on possible risk points encountered during our security 
 
 ## References
 - [Model Context Protocol (MCP) GitHub](https://github.com/modelcontextprotocol/modelcontextprotocol)
+- [Hou, X., Zhao, Y., Wang, S., & Wang, H. (2025). Model Context Protocol (MCP): Landscape, Security Threats, and Future Research Directions. *arXiv preprint arXiv:2503.23278*.](https://doi.org/10.48550/arXiv.2503.23278)
 
 [low_img]: assets/priority/low.svg  
 [medium_img]: assets/priority/medium.svg  
