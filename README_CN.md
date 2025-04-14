@@ -15,11 +15,11 @@
 
 - [概要](#概要)
 - [如何使用](#如何使用)
-- [MCP Server(MCP插件)安全](#mcp-servermcp-插件安全)
-- [MCP客户端/MCP HOST安全](#mcp客户端mcp-host安全)
-- [MCP在不同LLM上的适配和调用安全](#mcp在不同llm上的适配和调用安全)
-- [多MCP场景安全](#多mcp场景安全)
-- [加密货币相关MCP的特有安全点](#加密货币相关-mcp的特有安全点)
+- [MCP Server( MCP 插件)安全](#mcp-servermcp-插件安全)
+- [MCP 客户端/MCP HOST 安全](#mcp客户端mcp-host安全)
+- [MCP 在不同 LLM 上的适配和调用安全](#mcp在不同llm上的适配和调用安全)
+- [多 MCP 场景安全](#多mcp场景安全)
+- [加密货币相关 MCP 的特有安全点](#加密货币相关-mcp的特有安全点)
 - [参考资料](#参考资料)
 
 ## 概要
