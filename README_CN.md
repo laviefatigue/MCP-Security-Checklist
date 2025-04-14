@@ -48,7 +48,7 @@
 
 ## MCP Server (MCP 插件)安全
 
-> **说明:** MCP 服务是提供工具、资源和功能供 AI 调用的外部服务。即是目前 MCP 插件的形态。一般包含 Resources Tools Prompts
+> **说明:** MCP 服务是提供工具、资源和功能供 AI 调用的外部服务。即是目前 MCP 插件的形态。一般包含 Resources、Tools、Prompts
 
 ### API 安全
 
