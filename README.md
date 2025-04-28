@@ -20,6 +20,7 @@ We sincerely thank [FENZ.AI](https://fenz.ai/) for their valuable contributions 
 - [MCP Adaptation and Invocation Security on Different LLMs](#mcp-adaptation-and-invocation-security-on-different-llms)
 - [Multi-MCP Scenario Security](#multi-mcp-scenario-security)
 - [Unique Security Points for Cryptocurrency-related MCPs](#unique-security-points-for-cryptocurrency-related-mcps)
+- [MCP Security Self-Assessment Tools](#MCP-Security-Self-Assessment-Tools)
 - [References](#references)
 ## Overview
 
@@ -279,6 +280,12 @@ This checklist is based on possible risk points encountered during our security 
 - [ ] **Funds Operation Verification:** ![High][high_img] Implement secondary verification methods (e.g., Google Authenticator) for critical fund operations.
 - [ ] **Local Model Privacy Protection:** ![Medium][medium_img] Use locally hosted LLMs to safeguard privacy data; prevent third-party model providers from accessing wallet information or other sensitive data.
 - [ ] **Traditional Wallet Compatibility:** ![Medium][medium_img] Provide secure compatibility with traditional wallets, such as supporting transaction signing through existing wallet solutions.
+
+**[⬆ Back to Top](#-table-of-contents)**
+
+## MCP Security Self-Assessment Tools
+> **Note:** For most MCP applications, you can use the following security tools to perform scans and quickly detect high-risk issues automatically.
+- [Tencent: AI Infrastructure Security Assessment System](https://github.com/Tencent/AI-Infra-Guard)
 
 **[⬆ Back to Top](#-table-of-contents)**
 
